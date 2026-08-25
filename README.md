@@ -50,7 +50,7 @@ python3 ~/.claude/skills/plain-register/stamp.py --read report.md
 
 ## Why the checker is structural
 
-Readability formulas measure sentence length and syllable count, and nothing else. A passage can score well and still be too compressed to follow. So `check.py` looks for shapes instead. It separates labels (headings, captions, table cells) from prose, runs sentence-level checks on prose only, and reports candidates for a person to judge. The `plain-check` skill explains how to judge each list.
+Readability formulas measure only two things. Those are sentence length and syllable count. A passage can score well and still be too compressed to follow. So `check.py` looks for shapes instead. It separates labels (headings, captions, table cells) from prose, runs sentence-level checks on prose only, and reports candidates for a person to judge. The `plain-check` skill explains how to judge each list.
 
 ## Editing the rules
 
