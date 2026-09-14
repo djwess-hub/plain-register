@@ -1,6 +1,6 @@
 ---
 name: plain-check
-description: Audit prose against the plain-register rules without rewriting it. Reports undefined specialist terms, metaphor-nouns standing in for real things, dangling references, missing verbs, overlong sentences, punctuation pivots and paraprosdokian shapes. Use when the user says "plain check", "check the register", "did plain register run on this", "does this still hold up", "audit the language", or before circulating any document, deck or email. Also run automatically at the end of the plain-register skill. Args, an optional path to the file to check. With no args, check the material in the conversation.
+description: Audit prose against the plain-register rules without rewriting it. Reports undefined specialist terms, metaphor-nouns standing in for real things, dangling references, missing verbs, overlong sentences, punctuation pivots, paraprosdokian shapes and self-narration tells. Use when the user says "plain check", "check the register", "did plain register run on this", "does this still hold up", "audit the language", or before circulating any document, deck or email. Also run automatically at the end of the plain-register skill. Args, an optional path to the file to check. With no args, check the material in the conversation.
 ---
 
 # Plain check
@@ -65,9 +65,13 @@ The script cannot tell a real problem from a false positive. Read the source tex
 
 **Paraprosdokian candidates.** A paraprosdokian is a setup followed by a twist ending that makes the reader go back and re-read the setup. "Four steps, and only one of them is yours." "Everything about billing changed. Your invoice didn't." The register bans them outright, with no exceptions, so every real one must be rewritten as plain statements. Say what the setup meant, then what the payoff meant, in separate sentences.
 
+**Ownership idioms.** A possessive followed by an infinitive. "Is the firm's to hold", "is theirs to decide", "the call is yours to make." The sentence says a party owns the act but never says the party does it, so the reader has to work out who holds or decides. Rewrite to say who does what. Plain possessive nouns such as "the firm's fee" do not match, because no verb follows them.
+
 The script finds two shapes. Shape A is one sentence, marked `A` in the list. It has a setup, then a comma with "and" or "yet", or "but", or a colon, semicolon or dash, then a short tail that opens on a limiter ("only", "just", "never", "none", "nothing", "nobody") or ends on a negation ("didn't", "is not"). Shape B is two sentences, marked `B` and shown as `first || second`. The second is short and ends on a bare auxiliary or a negation, so it reads as an elided contradiction. Items tagged `(label)` came from a heading, title or table cell.
 
 Expect false positives. "And only if both halves are plain" fires shape A and is fine. "She said it would rain. It did." fires shape B and is a judgment call. Read each candidate and ask one question. Does the ending force a re-read of the beginning? If yes, it is banned. If the ending simply continues the thought, dismiss it.
+
+**Self-narration candidates.** The text talking about itself or about its writer. The first family announces the register: "Here is the plain read", "put simply", "to be clear". The second family declares intent or restraint: "so I will stick to what it means", "I won't speculate", "we'll keep this brief". Both are banned, because the announcement adds nothing and declared restraint implies the unwanted thing was on the table. The fix is to delete the announcement and keep the content. A scope limit the reader actually needs survives as a fact about the material ("The card carries the full numbers. This section explains what they mean."). Two false-positive classes to dismiss by hand: quoted speech that happens to contain a tell, and a real commitment by a team ("We will stick to the schedule"), which is a claim about future behavior rather than narration.
 
 ## The readability scores are a floor, not a pass
 

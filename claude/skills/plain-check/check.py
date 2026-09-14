@@ -2,7 +2,8 @@
 """Mechanical half of the plain-register check.
 
 Finds the things an eye skips: exact sentence lengths, punctuation pivots,
-paraprosdokian shapes, undefined-term candidates, dangling references, and
+paraprosdokian shapes, self-narration tells, undefined-term candidates,
+dangling references, and
 missing verbs. It reports candidates. Judging them is the model's job, because none of these tests can
 tell a real problem from a false positive on its own.
 
@@ -136,6 +137,10 @@ def syl(w):
 
 
 def split_sentences(text):
+    # Strip bold and italic markers first. A bold lead sentence ends "hold.**"
+    # and the full stop is not followed by whitespace, so without this the lead
+    # and the next sentence merge and every sentence check misses the lead.
+    text = re.sub(r'\*\*|__|(?<!\w)[*_](?=\w)|(?<=\w)[*_](?!\w)', '', text)
     return [s.strip() for s in re.split(r'(?<=[.!?])\s+', text) if s.strip()]
 
 # ------------------------------------------------------------------- lexicons
@@ -227,6 +232,31 @@ runway moat flywheel anchor backbone funnel seam texture grain footprint
 posture appetite muscle bandwidth north_star centre_of_gravity long_pole
 surface_area""".split()
 
+# The text talking about itself or about its writer. Two families: announcing
+# the register ("Here is the plain read", "to be clear"), and declaring intent
+# or restraint ("I will stick to", "I won't speculate"). Both are banned,
+# because the announcement adds nothing and declared restraint implies the
+# unwanted thing was on the table. Imperatives ("Stick to the plan") do not
+# match, because the patterns require a first-person subject.
+NARRATOR_TELLS = [
+    r"here is the plain (read|version|answer|view)",
+    r"\bthe plain read\b",
+    r"\bin plain (terms|english|words)\b",
+    r"\b(put simply|simply put|to put it plainly|plainly put)\b",
+    r"\bto be (clear|blunt|honest|frank|fair|candid)\b",
+    r"\blet me be (clear|blunt|direct|honest|frank)\b",
+    r"\b(frankly|candidly|honestly)[,:]",
+    r"\b(i|we)('ll| will) (stick|keep|confine|limit) (to|myself|ourselves)\b",
+    r"\b(i|we) (won't|will not|shall not) (speculate|guess|editorialize|embellish|pad)\b",
+    r"\bwithout (speculating|editorializing)\b",
+    r"\bspare you\b",
+    r"\b(i|we)('ll| will) keep (this|it) (short|brief)\b",
+    r"\bjust the facts\b",
+    r"\bsticking to the facts\b",
+    r"\bno speculation\b",
+]
+NARRATOR_RES = [re.compile(x, re.I) for x in NARRATOR_TELLS]
+
 # Terms of art built from ordinary short words, so no length test can see them.
 JARGON_PHRASES = """data room|arrangement agreement|cap rate|run rate|term sheet|
 reverse fee|termination fee|break fee|earn out|drag along|tag along|due diligence|
@@ -240,6 +270,18 @@ maturity model|cost to serve|total cost of ownership|build versus buy|
 capex|opex|run book|air gap|single pane of glass|left shift|shift left""".replace('\n', '').split('|')
 
 LEADING_REF = re.compile(r'^(It|This|That|These|Those|They|Such|Here|There)\b')
+
+# Ownership idioms. "is the firm's to hold", "is theirs to decide", "the call is
+# yours to make". The possessive plus infinitive says that a party owns the
+# act, but never says the party does it, so the reader has to work out who
+# holds, decides or obtains. Say who does what. "The firm is the certified party
+# for one of them." "The client decides." Plain possessive nouns ("the firm's fee")
+# do not match, because a verb must follow the possessive.
+OWNERSHIP_IDIOM = re.compile(
+    r"\b(?:[A-Z][\w-]*'s|\w+s'|mine|yours|ours|theirs|his|hers)\s+to\s+"
+    r"(?:hold|obtain|decide|make|keep|call|own|lose|win|give|take|carry|run|fix|"
+    r"answer|choose|sign|earn|secure|set|shape|define|approve|manage|settle|"
+    r"resolve|deliver|build|operate|issue|rely on|use|spend|claim|pick|name)\b", re.I)
 SAME_X = re.compile(r'\bthe (same|latter|former|above|underlying|resulting) \w+', re.I)
 
 
@@ -414,6 +456,12 @@ def report(name, chunks, verbose=False):
     block('paraprosdokian candidates', pp,
           'hard ban. Setup then twist. Say the setup, then the payoff, as plain sentences')
 
+    # OWNERSHIP IDIOMS, prose and labels ---------------------------------------
+    own = [s[:110] for s in real if OWNERSHIP_IDIOM.search(s)]
+    own += [t[:100] + '   (label)' for t in labels if OWNERSHIP_IDIOM.search(t)]
+    block('ownership idioms (possessive + to + verb)', own,
+          'say who does what. "is the firm\'s to hold" becomes "the firm holds it" or "the firm is the certified party"')
+
     # TERM INVENTORY, over labels as well as prose ---------------------------
     first = {}
     for i, s in enumerate(real):
@@ -460,6 +508,18 @@ def report(name, chunks, verbose=False):
           [m.replace('_', ' ') for m in METAPHOR_NOUNS
            if re.search(rf'\b{m.replace("_", "[ -]")}\b', everything, re.I)],
           'name the real thing, or define the metaphor')
+
+    tells = []
+    for _, t in chunks:
+        spans = []
+        for pat in NARRATOR_RES:
+            for m in pat.finditer(t):
+                if any(m.start() >= a and m.end() <= b for a, b in spans):
+                    continue
+                spans.append((m.start(), m.end()))
+                tells.append(f'"{m.group(0)}" in: {t[:85]}')
+    block('self-narration candidates', tells,
+          'the text talking about itself. Delete the announcement, keep the content')
 
     # REFERENT CHECK, prose only --------------------------------------------
     refs = []

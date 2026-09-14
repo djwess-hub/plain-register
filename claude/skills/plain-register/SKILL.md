@@ -28,6 +28,7 @@ What this skill adds on top of those rules is the procedure below. That covers h
 
 - Compressed aphorisms. "Dashboards depreciate, models appreciate."
 - Paraprosdokians. A setup, then a twist ending that makes the reader re-read the setup. "Four steps, and only one of them is yours." "Everything about billing changed. Your invoice didn't." Hard ban, no exceptions. The rules file has the full definition and a rewrite example.
+- Self-narration. The text announcing its own register ("Here is the plain read") or the writer declaring intent or restraint ("so I will stick to what it means"). Delete the announcement and keep the content. The rules file has the full definition and a rewrite example.
 - Conceptual pivot phrases that make the reader do the unpacking. "False by construction." "Calendar-bound long poles."
 - Surprising word pairings, and large words used in unexpected ways.
 - Multi-idea sentences, especially the colon-pivot and the parallel-contrast pair.
